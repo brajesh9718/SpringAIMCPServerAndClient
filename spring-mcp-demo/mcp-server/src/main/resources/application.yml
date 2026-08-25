@@ -1,0 +1,45 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: customer-mcp-server
+  
+  # H2 In-Memory Database Configuration
+  datasource:
+    url: jdbc:h2:mem:customerdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  
+  # AI MCP Server Configuration
+  ai:
+    mcp:
+      server:
+        protocol: STREAMABLE
+        name: customer-mcp-server
+        version: 1.0.0
+        instructions: Provides approved customer lookup operations.
+        streamable-http:
+          mcp-endpoint: /mcp
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.hibernate: INFO
