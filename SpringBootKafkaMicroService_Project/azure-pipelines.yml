@@ -1,0 +1,37 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  javaVersion: '21'
+  acrLoginServer: 'youracr.azurecr.io'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: MavenBuild
+        steps:
+          - task: JavaToolInstaller@0
+            inputs:
+              versionSpec: '$(javaVersion)'
+              jdkArchitectureOption: x64
+              jdkSourceOption: PreInstalled
+          - script: mvn -B clean verify
+            displayName: Maven clean verify
+
+  - stage: Docker
+    dependsOn: Build
+    jobs:
+      - job: DockerBuild
+        steps:
+          - script: mvn -B clean package -DskipTests
+            displayName: Package services
+          - script: |
+              docker build -t $(acrLoginServer)/order-producer-service:$(Build.BuildId) order-producer-service
+              docker build -t $(acrLoginServer)/order-consumer-service:$(Build.BuildId) order-consumer-service
+              docker build -t $(acrLoginServer)/api-gateway:$(Build.BuildId) api-gateway
+            displayName: Build Docker images

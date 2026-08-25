@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-producer-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-producer-service
+  template:
+    metadata:
+      labels:
+        app: order-producer-service
+    spec:
+      containers:
+        - name: order-producer-service
+          image: youracr.azurecr.io/order-producer-service:latest
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: app-config
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
